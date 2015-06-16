@@ -61,8 +61,17 @@ public class NewsAdapter extends BaseAdapter{
         viewHolder.tvContent.setText(mNewsBeanList.get(position).description);
         viewHolder.ivIcon.setImageResource(R.mipmap.ic_launcher);
         viewHolder.ivIcon.setTag(urls.get(position));
-        mImageLoader.showImageByAsyncTask(viewHolder.ivIcon, AsyncUtils.getURL());
+        mImageLoader.showImageByAsyncTask(viewHolder.ivIcon, urls.get(position));
         return convertview;
+    }
+
+    public void loadImage(int start,int count){
+        List<String> newUrlList = new ArrayList<>();
+        String url = new String();
+        for(int i=start;i<count-start;i++){
+            url = urls.get(i);
+            newUrlList.add(url);
+        }
     }
 
     class ViewHolder{

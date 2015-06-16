@@ -13,7 +13,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -23,6 +22,7 @@ public class ImageLoader {
     private ImageView mImageView;
     private String mUrl;
     private LruCache<String,Bitmap> mCache;
+    private ImageAsyncTask mNewsAsyncTask;
 
 
     public ImageLoader() {
@@ -37,7 +37,7 @@ public class ImageLoader {
     }
 
     public void addBitmapToCache(String url,Bitmap bitmap){
-        if(mCache.get(url)!=null){
+        if(mCache.get(url)==null){
             mCache.put(url,bitmap);
         }
     }
@@ -96,17 +96,18 @@ public class ImageLoader {
     public void showImageByAsyncTask(ImageView imageView,String url){
         Bitmap bitmap = getBitmapFromCache(url);
         if (bitmap==null){
-            new NewsAsyncTask(imageView,url).execute(url);
+            mNewsAsyncTask = new ImageAsyncTask(imageView,url);
+            mNewsAsyncTask.execute(url);
         }else{
             imageView.setImageBitmap(bitmap);
         }
 
     }
 
-    private class NewsAsyncTask extends AsyncTask<String,Void,Bitmap>{
+    private class ImageAsyncTask extends AsyncTask<String,Void,Bitmap>{
         private ImageView imageView;
         private String url;
-        public NewsAsyncTask(ImageView imageView,String url) {
+        public ImageAsyncTask(ImageView imageView,String url) {
             this.imageView = imageView;
             this.url = url;
         }
@@ -114,10 +115,9 @@ public class ImageLoader {
         @Override
         protected Bitmap doInBackground(String... strings) {
             Bitmap bitmap = getBitmapFromCache(strings[0]);
-            if(bitmap!=null){
-                addBitmapToCache(url,bitmap);
-            }else{
+            if(bitmap == null){
                 bitmap = getBitmapFromURL(strings[0]);
+                addBitmapToCache(url,bitmap);
             }
             return bitmap;
         }
@@ -125,7 +125,6 @@ public class ImageLoader {
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             super.onPostExecute(bitmap);
-            Log.i("TAG","bitmap"+bitmap);
             if (imageView.getTag().equals(url)){
                 imageView.setImageBitmap(bitmap);
             }
