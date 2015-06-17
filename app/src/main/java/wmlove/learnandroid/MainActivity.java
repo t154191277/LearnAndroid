@@ -27,19 +27,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         mNewsAsyncTask = new NewsAsyncTask();
         mNewsAsyncTask.execute(URL);
-        mImageLoader = new ImageLoader();
         mListView = (ListView) findViewById(R.id.mListView);
-        mListView.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView absListView, int state) {
-                if (state == SCROLL_STATE_IDLE) {
-                }
-            }
-
-            @Override
-            public void onScroll(AbsListView absListView, int first, int count, int totalcount) {
-            }
-        });
     }
 
     class NewsAsyncTask extends AsyncTask<String,Void,List<NewsBean>>{
@@ -52,7 +40,7 @@ public class MainActivity extends Activity {
         @Override
         protected void onPostExecute(List<NewsBean> newsBeans) {
             super.onPostExecute(newsBeans);
-            mNewsAdapter = new NewsAdapter(newsBeans,getApplicationContext());
+            mNewsAdapter = new NewsAdapter(newsBeans,getApplicationContext(),mListView);
             mListView.setAdapter(mNewsAdapter);
         }
     }

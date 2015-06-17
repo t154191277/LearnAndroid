@@ -4,8 +4,10 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -16,17 +18,21 @@ import wmlove.learnandroid.R;
 /**
  * Created by Administrator on 2015/6/12.
  */
-public class NewsAdapter extends BaseAdapter{
+public class NewsAdapter extends BaseAdapter implements AbsListView.OnScrollListener{
     private List<NewsBean> mNewsBeanList;
     private LayoutInflater mLayoutInflater;
-    private List<String> urls;
+    public static List<String> urls;
     private ImageLoader mImageLoader;
+    private int mStart,mEnd;
+    private boolean isFirst;
 
-    public NewsAdapter(List<NewsBean> mNewsBeanList,Context context) {
+    public NewsAdapter(List<NewsBean> mNewsBeanList,Context context,ListView listView) {
         this.mNewsBeanList = mNewsBeanList;
         this.mLayoutInflater = LayoutInflater.from(context);
         this.urls = AsyncUtils.getUrls(mNewsBeanList);
-        this.mImageLoader = new ImageLoader();
+        this.mImageLoader = new ImageLoader(listView);
+        isFirst = true;
+        listView.setOnScrollListener(this);
     }
 
     @Override
@@ -65,12 +71,24 @@ public class NewsAdapter extends BaseAdapter{
         return convertview;
     }
 
-    public void loadImage(int start,int count){
-        List<String> newUrlList = new ArrayList<>();
-        String url = new String();
-        for(int i=start;i<count-start;i++){
-            url = urls.get(i);
-            newUrlList.add(url);
+
+
+    @Override
+    public void onScrollStateChanged(AbsListView absListView, int scrollState) {
+        if(scrollState == SCROLL_STATE_IDLE){
+            mImageLoader.loadImage(mStart,mEnd);
+        }else{
+            mImageLoader.cacheAllTasks();
+        }
+    }
+
+    @Override
+    public void onScroll(AbsListView absListView, int start, int count, int totalcount) {
+        mStart = start;
+        mEnd = start + count;
+        if(isFirst && count>0){
+            mImageLoader.loadImage(mStart,mEnd);
+            isFirst = false;
         }
     }
 

@@ -8,12 +8,17 @@ import android.os.Message;
 import android.util.Log;
 import android.util.LruCache;
 import android.widget.ImageView;
+import android.widget.ListView;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
+
+import wmlove.learnandroid.R;
 
 /**
  * Created by Administrator on 2015/6/13.
@@ -22,10 +27,14 @@ public class ImageLoader {
     private ImageView mImageView;
     private String mUrl;
     private LruCache<String,Bitmap> mCache;
-    private ImageAsyncTask mNewsAsyncTask;
+    private ImageAsyncTask mImageAsyncTask;
+    private ListView mListView;
+    private Set<ImageAsyncTask> mTasks;
 
+    public ImageLoader(ListView mListView) {
 
-    public ImageLoader() {
+        this.mListView = mListView;
+        mTasks = new HashSet<>();
         int maxMemory = (int) Runtime.getRuntime().maxMemory();
         int cacheSize = maxMemory/4;
         mCache = new LruCache<String,Bitmap>(cacheSize){
@@ -96,27 +105,32 @@ public class ImageLoader {
     public void showImageByAsyncTask(ImageView imageView,String url){
         Bitmap bitmap = getBitmapFromCache(url);
         if (bitmap==null){
-            mNewsAsyncTask = new ImageAsyncTask(imageView,url);
-            mNewsAsyncTask.execute(url);
+            imageView.setImageResource(R.mipmap.ic_launcher);
         }else{
             imageView.setImageBitmap(bitmap);
         }
 
     }
 
+    public void cacheAllTasks() {
+        if(mTasks != null){
+            for(ImageAsyncTask task : mTasks){
+                task.cancel(false);
+            }
+        }
+    }
+
     private class ImageAsyncTask extends AsyncTask<String,Void,Bitmap>{
         private ImageView imageView;
         private String url;
-        public ImageAsyncTask(ImageView imageView,String url) {
-            this.imageView = imageView;
-            this.url = url;
-        }
+
 
         @Override
         protected Bitmap doInBackground(String... strings) {
-            Bitmap bitmap = getBitmapFromCache(strings[0]);
+            this.url = strings[0];
+            Bitmap bitmap = getBitmapFromCache(url);
             if(bitmap == null){
-                bitmap = getBitmapFromURL(strings[0]);
+                bitmap = getBitmapFromURL(url);
                 addBitmapToCache(url,bitmap);
             }
             return bitmap;
@@ -125,7 +139,25 @@ public class ImageLoader {
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             super.onPostExecute(bitmap);
-            if (imageView.getTag().equals(url)){
+            imageView = (ImageView) mListView.findViewWithTag(url);
+            if (imageView !=null && bitmap != null){
+                imageView.setImageBitmap(bitmap);
+            }
+            mTasks.remove(this);
+        }
+    }
+
+    public void loadImage(int start,int end){
+        String url;
+        for(int i=start;i<end;i++){
+            url = NewsAdapter.urls.get(i);
+            Bitmap bitmap = getBitmapFromCache(url);
+            if(bitmap == null){
+                ImageAsyncTask task = new ImageAsyncTask();
+                task.execute(url);
+                mTasks.add(task);
+            }else{
+                ImageView imageView = (ImageView) mListView.findViewWithTag(url);
                 imageView.setImageBitmap(bitmap);
             }
         }
