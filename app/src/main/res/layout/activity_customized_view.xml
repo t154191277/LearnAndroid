@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:wmlove="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <wmlove.android_customizeview.BasicView.ExtendTextView
+        android:id="@+id/extendTextView"
+        wmlove:color="#808080"
+        android:gravity="center"
+        android:onClick="EntendTextView"
+        android:text="1"
+        android:textSize="20sp"
+        android:background="@drawable/test_text"
+        android:layout_width="50dp"
+        android:layout_height="50dp" />
+
+    <wmlove.android_customizeview.BasicView.ExtendLinearlayout
+        android:id="@+id/extendLinearlayout"
+        android:layout_below="@id/extendTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp">
+
+    </wmlove.android_customizeview.BasicView.ExtendLinearlayout>
+
+    <wmlove.android_customizeview.BasicView.ExtendFrameLayout
+        android:id="@+id/mExtendFrameLayout"
+        android:layout_below="@id/extendLinearlayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+    </wmlove.android_customizeview.BasicView.ExtendFrameLayout>
+
+    <wmlove.android_customizeview.BasicView.ExtendView
+        android:id="@+id/extendView"
+        android:layout_below="@id/mExtendFrameLayout"
+        android:layout_centerInParent="true"
+        android:layout_width="100dp"
+        android:layout_height="100dp" >
+
+    </wmlove.android_customizeview.BasicView.ExtendView>
+</RelativeLayout>
